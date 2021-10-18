@@ -43,12 +43,12 @@
 pip install boto3
 ```
 
-5. Create a new paragraph and execute the below code. This will create a DynamoDB table in ap-southeast-2
+5. Create a new paragraph and execute the below code. This will create a DynamoDB table in us-east-1
 ```
 %flink.ipyflink
 #create table innovate_latlon
 import boto3
-region='ap-southeast-2'
+region='us-east-1'
 dynamodb = boto3.resource('dynamodb',region_name=region)
 response = dynamodb.create_table(
     AttributeDefinitions=[
@@ -69,12 +69,12 @@ response = dynamodb.create_table(
 ```
 ![kda6](/images/kda6.png)
 
-6. Create a new paragraph and execute the below code. This will create another DynamoDB table in ap-southeast-2
+6. Create a new paragraph and execute the below code. This will create another DynamoDB table in us-east-1
 ```
 %flink.ipyflink
 #create table innovate_custfeedback
 import boto3
-region='ap-southeast-2'
+region='us-east-1'
 dynamodb = boto3.resource('dynamodb',region_name=region)
 response = dynamodb.create_table(
     AttributeDefinitions=[
@@ -94,12 +94,12 @@ response = dynamodb.create_table(
 )
 ```
 
-7. Create a new paragraph and execute the below code. This will create a Kinesis data stream in ap-southeast-2
+7. Create a new paragraph and execute the below code. This will create a Kinesis data stream in us-east-1
 ```
 %flink.ipyflink
 #create KDS innovate_feedback
 import boto3
-region='ap-southeast-2'
+region='us-east-1'
 kinesis = boto3.client('kinesis',region_name=region)
 response = kinesis.create_stream(
     StreamName='innovate_feedback',
@@ -124,7 +124,7 @@ print (response)
 import boto3
 import csv
 import codecs
-region='ap-southeast-2'
+region='us-east-1'
 recList=[]
 tableName='innovate_latlon'
 s3 = boto3.resource('s3')
@@ -169,7 +169,7 @@ print ('completed')
 import boto3
 import csv
 import codecs
-region='ap-southeast-2'
+region='us-east-1'
 recList=[]
 tableName='innovate_custfeedback'
 s3 = boto3.resource('s3')
@@ -213,7 +213,7 @@ from boto3.dynamodb.conditions import Key
 tablename_latlon='innovate_latlon'
 kdsname='innovate_feedback'
 tablename_innovate_custfeedback='innovate_custfeedback'
-region='ap-southeast-2'
+region='us-east-1'
 i=0
 clientkinesis = boto3.client('kinesis',region_name=region)
 
@@ -310,7 +310,7 @@ PARTITIONED BY (product)
 WITH (
     'connector' = 'kinesis',
     'stream' = 'innovate_feedback',
-    'aws.region' = 'ap-southeast-2',
+    'aws.region' = 'us-east-1',
     'scan.stream.initpos' = 'LATEST',
     'format' = 'json',
     'json.timestamp-format.standard' = 'ISO-8601'
