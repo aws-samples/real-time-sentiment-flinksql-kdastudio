@@ -36,6 +36,7 @@
 ![kda5](/images/kda5.png)
 
 ** We are going to use the notebook to provisioned some AWS resources, for example, DynamoDB table, Kinesis Data Streams etc. For that, we are using boto3. 
+
 4. The boto3 library is preinstalled. Run the below command if step 5 is showing an error on boto3. Execute the following code to install boto3. 
 ```
 %flink.ipyflink
