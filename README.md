@@ -131,7 +131,7 @@ tableName='innovate_latlon'
 s3 = boto3.resource('s3')
 dynamodb = boto3.client('dynamodb', region_name=region)
 bucket='YOUR_BUCKETNAME'
-key='real-time-sentiment-flinkSQL-KDAStudio/latlon.csv'
+key='latlon.csv'
 obj = s3.Object(bucket, key).get()['Body']
 batch_size = 100
 batch = []
@@ -176,7 +176,7 @@ tableName='innovate_custfeedback'
 s3 = boto3.resource('s3')
 dynamodb = boto3.client('dynamodb', region_name=region)
 bucket='YOUR_BUCKETNAME'
-key='real-time-sentiment-flinkSQL-KDAStudio/custfeedback.csv'
+key='custfeedback.csv'
 obj = s3.Object(bucket, key).get()['Body']
 batch_size = 100
 batch = []
