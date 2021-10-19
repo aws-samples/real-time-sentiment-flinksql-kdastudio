@@ -327,7 +327,8 @@ SELECT * FROM innovate_feedback;
 ```
 ![kda7](/images/kda7.png)
 
-6.  Add a new paragraph and execute the below code
+6.  Add a new paragraph and execute the below code. Stop the Flink job once you see the table with the column name. Click on Settings, change the visualization as highlighted below and execute the code again.
+ 
 ```
 %flink.ssql(type=update)
 --Product wise sentiment
@@ -339,7 +340,8 @@ GROUP BY TUMBLE(event_time, INTERVAL '10' second), innovate_feedback.product, in
 ```
 ![kda8](/images/kda8.png)
 
-7. Add a new paragraph and execute the below code
+7. Add a new paragraph and execute the below code. Stop the Flink job once you see the table with the column name. Click on Settings, change the visualization as highlighted below and execute the code again.
+ 
 ```
 %flink.ssql(type=update)
 --state wise sentiment
