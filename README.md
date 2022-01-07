@@ -121,44 +121,33 @@ print (response)
  2. Create a new paragraph on your prerequisite notebook and add the following code. Change the S3 location `YOUR_BUCKETNAME` to your S3 bucket (bucket, key) and execute the code. This will upload the latlon data to a DynamoDB table you created earlier.
  
  ```
- %flink.ipyflink
+%flink.ipyflink
 #upload lanlon data
 import boto3
 import csv
 import codecs
-region='us-east-1'
-recList=[]
-tableName='innovate_latlon'
+region = 'us-east-1'
+recList = []
+tableName = 'innovate_latlon'
 s3 = boto3.resource('s3')
-dynamodb = boto3.client('dynamodb', region_name=region)
-bucket='YOUR_BUCKETNAME'
-key='latlon.csv'
+dynamodb = boto3.resource('dynamodb', region_name=region)
+table = dynamodb.Table(tableName)
+bucket = 'YOUR_BUCKETNAME'
+key = 'latlon.csv'
 obj = s3.Object(bucket, key).get()['Body']
-batch_size = 100
-batch = []
-i=0
 
-for row in csv.DictReader(codecs.getreader('utf-8')(obj)):
-    pk= (row["id"])
-    postcode= (row["postcode"])
-    suburb= (row["suburb"])
-    State= (row["State"])
-    latitude= (row["latitude"])
-    longitude= (row["longitude"])
-    
-    response = dynamodb.put_item(
-        TableName=tableName,
-        Item={
-        'pk' : {'S':str(pk)},
-        'postcode': {'S':postcode},
-        'suburb': {'S':suburb},
-        'State': {'S':State},
-        'latitude': {'S':latitude},
-        'longitude': {'S':longitude}
+with table.batch_writer() as batch:
+    for row in csv.DictReader(codecs.getreader('utf-8')(obj)):
+        item = {
+            'pk': str(row["id"]),
+            'postcode': row["postcode"],
+            'suburb': row["suburb"],
+            'State': row["State"],
+            'latitude': row["latitude"],
+            'longitude': row["longitude"]
         }
-    )
-    i=i+1
-    #print ('Total insert: '+ str(i))
+        
+        batch.put_item(Item=item)
     
 print ('completed')
  ```
