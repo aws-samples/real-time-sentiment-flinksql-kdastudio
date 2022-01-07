@@ -5,13 +5,14 @@
 ![kda1](/images/kda1.PNG)
 
 ## Create a Kinesis Data Analytics Studio notebook
-1. Go to Kinesis Data Analytics Console: console.aws.amazon.com/kinesisanalytics
-2. Click on the Studio tab
-3. Click on create Studio notebook
-4. Choose "Quick create with sample code" as create method
-5. Enter a notebook name
-6. For AWS Gluedatabse click on the refresh button and select Default Glue database. If the list is still empty, create a new Glue database.
-7. Note down the IAM role name. Click on Create Studio Notebook.
+1. Go to Kinesis Data Analytics Console: https://console.aws.amazon.com/kinesisanalytics
+2. Select `us-east-1` as your region
+3. Click on the Studio tab
+4. Click on create Studio notebook
+5. Choose "Quick create with sample code" as create method
+6. Enter a notebook name
+7. For AWS Gluedatabase click on the refresh button and select Default Glue database. If the list is still empty, create a new Glue database.
+8. Note down the IAM role name. Click on Create Studio Notebook.
 
 ![kda1](/images/kda2.png)
 
@@ -24,15 +25,15 @@
 ![kda1](/images/kda3.png)
 
 ## Working with Kinesis Data Analytics Studio
-1. Go to Kinesis Data Analytics Console: console.aws.amazon.com/kinesisanalytics
+1. Go to Kinesis Data Analytics Console: https://console.aws.amazon.com/kinesisanalytics
 2. Click on the Studio tab and select the notebook you have created in the previous step
 3. Click on Run and Click on Open in Apache Zeppelin once the statue of the Notebook is running
 ![kda4](/images/kda4.png)
 
 ## Working with Kinesis Data Analytics Studio - create a prerequisite notebook
 1. In the notebook console create a new note
-2. enter the name of your notebook- "prerequisite"
-3. Select Default Interprete as Flink and create the notebook
+2. Enter the name of your notebook - "prerequisite"
+3. Select Default Interpreter as Flink and create the notebook
 ![kda5](/images/kda5.png)
 
 ** We are going to use the notebook to provisioned some AWS resources, for example, DynamoDB table, Kinesis Data Streams etc. For that, we are using boto3. 
@@ -111,58 +112,47 @@ print (response)
 ```
 
 ## Uploading sample data
-1. Create a new S3 bucket or upload the below CSV files to your S3 bucket
+1. Create a new S3 bucket or upload the below CSV files to your existing S3 bucket
 
     a) [custfeedback.csv](sampledata/custfeedback.csv)
 
     b) [latlon.csv](sampledata/latlon.csv)
  
- 2. Create a new paragraph on your prerequisite notebook and execute the below code. Change the S3 location as your's (bucket, key). This will upload the latlon data to a DynamoDB table you created earlier.
+ 2. Create a new paragraph on your prerequisite notebook and add the following code. Change the S3 location `YOUR_BUCKETNAME` to your S3 bucket (bucket, key) and execute the code. This will upload the latlon data to a DynamoDB table you created earlier.
  
  ```
- %flink.ipyflink
+%flink.ipyflink
 #upload lanlon data
 import boto3
 import csv
 import codecs
-region='us-east-1'
-recList=[]
-tableName='innovate_latlon'
+region = 'us-east-1'
+recList = []
+tableName = 'innovate_latlon'
 s3 = boto3.resource('s3')
-dynamodb = boto3.client('dynamodb', region_name=region)
-bucket='YOUR_BUCKETNAME'
-key='latlon.csv'
+dynamodb = boto3.resource('dynamodb', region_name=region)
+table = dynamodb.Table(tableName)
+bucket = 'YOUR_BUCKETNAME'
+key = 'latlon.csv'
 obj = s3.Object(bucket, key).get()['Body']
-batch_size = 100
-batch = []
-i=0
 
-for row in csv.DictReader(codecs.getreader('utf-8')(obj)):
-    pk= (row["id"])
-    postcode= (row["postcode"])
-    suburb= (row["suburb"])
-    State= (row["State"])
-    latitude= (row["latitude"])
-    longitude= (row["longitude"])
-    
-    response = dynamodb.put_item(
-        TableName=tableName,
-        Item={
-        'pk' : {'S':str(pk)},
-        'postcode': {'S':postcode},
-        'suburb': {'S':suburb},
-        'State': {'S':State},
-        'latitude': {'S':latitude},
-        'longitude': {'S':longitude}
+with table.batch_writer() as batch:
+    for row in csv.DictReader(codecs.getreader('utf-8')(obj)):
+        item = {
+            'pk': str(row["id"]),
+            'postcode': row["postcode"],
+            'suburb': row["suburb"],
+            'State': row["State"],
+            'latitude': row["latitude"],
+            'longitude': row["longitude"]
         }
-    )
-    i=i+1
-    #print ('Total insert: '+ str(i))
+        
+        batch.put_item(Item=item)
     
 print ('completed')
  ```
 
-3. Create a new paragraph on your prerequisite notebook and execute the below code. Change the S3 location as your's (bucket, key). This will upload the customer feedback data to a DynamoDB table you created earlier.
+3. Create a new paragraph on your prerequisite notebook and add the following code. Change the S3 location `YOUR_BUCKETNAME` to your S3 bucket (bucket, key) and execute the code. This will upload the customer feedback data to a DynamoDB table you created earlier.
 
 ```
 %flink.ipyflink
@@ -288,8 +278,8 @@ print('###total rows:#### '+ str(i))
 
 ## Real-time analytics with Flink SQL
 1. In the notebook console create a new note
-2. enter the name of your notebook- "flinkSQLExample"
-3. Select Default Interprete as Flink and create the notebook
+2. Enter the name of your notebook - "flinkSQLExample"
+3. Select Default Interpreter as Flink and create the notebook
 4. Execute the below code
 
 ```
@@ -327,7 +317,7 @@ SELECT * FROM innovate_feedback;
 ```
 ![kda7](/images/kda7.png)
 
-6.  Add a new paragraph and execute the below code. Stop the Flink job once you see the table with the column name. Click on Settings, change the visualization as highlighted below and execute the code again.
+6.  Add a new paragraph and execute the below code. Stop the Flink job once you see the table with the column name. Click on Settings, change the visualization type to Bar Chart, and drag the `sentiment` column to Groups as highlighted below and execute the code again.
  
 ```
 %flink.ssql(type=update)
@@ -352,3 +342,8 @@ GROUP BY TUMBLE(event_time, INTERVAL '10' second), innovate_feedback.state, inno
 
 ```
 ![kda9](/images/kda9.png)
+
+## Lab Cleanup
+1. Remove the notebook you created in section 1
+2. Delete the 2 files yuou uploaded to your S3 bucket, and optionally delete the S3 bucket.
+3. Delete the 2 DynamoDB tables `innovate_latlon` and `innovate_custfeedback`
