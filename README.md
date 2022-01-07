@@ -342,3 +342,8 @@ GROUP BY TUMBLE(event_time, INTERVAL '10' second), innovate_feedback.state, inno
 
 ```
 ![kda9](/images/kda9.png)
+
+## Lab Cleanup
+1. Remove the notebook you created in section 1
+2. Delete the 2 files yuou uploaded to your S3 bucket, and optionally delete the S3 bucket.
+3. Delete the 2 DynamoDB tables `innovate_latlon` and `innovate_custfeedback`
